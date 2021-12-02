@@ -90,30 +90,3 @@ jobs:
             DBUILD_SITE_URL=https://openebs.io
             RELEASE_TAG=${{ env.RELEASE_TAG }}
 
-  trivy:
-    runs-on: ubuntu-latest
-    needs: ['ndm-build-base']
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v2
-
-      - name: Set Image Org 
-        # sets the default IMAGE_ORG to openebs
-        run: |
-          [ -z "${{ secrets.IMAGE_ORG }}" ] && IMAGE_ORG=openebs || IMAGE_ORG=${{ secrets.IMAGE_ORG}}
-          echo "IMAGE_ORG=${IMAGE_ORG}" >> $GITHUB_ENV
-        
-      - name: Set Release Tag
-        run: |
-          TAG="${GITHUB_REF#refs/*/v}"
-          echo "RELEASE_TAG=${TAG}" >> $GITHUB_ENV
-        
-      - name: Run Trivy vulnerability scanner
-        uses: aquasecurity/trivy-action@master
-        with:
-          image-ref: ghcr.io/${{ env.IMAGE_ORG }}/ndm-build-base:${{ env.RELEASE_TAG }}
-          format: 'table'
-          exit-code: '1'
-          ignore-unfixed: true
-          severity: 'CRITICAL,HIGH'
-
